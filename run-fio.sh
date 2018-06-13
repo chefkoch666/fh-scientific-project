@@ -25,13 +25,11 @@ for fs in "${FS_TYPE[@]}"; do
     if [[ ${fs} == "ext4" ]]; then
       echo "${sched}" | sudo tee /sys/block/sda/queue/scheduler > /dev/null
     else
-      echo "${sched}" | sudo tee /sys/block/sdb/queue/scheduler > /dev/null
+      echo "${sched}" | sudo tee /sys/block/sdc/queue/scheduler > /dev/null
     fi
-    #echo -n "Current scheduler was just changed to : "
-    #sed -e 's/.*\[\(.*\)\].*/\1/' /sys/block/sda/queue/scheduler
     for testrun in $(seq 1 ${TIMES_TO_RUN}); do
       echo -ne "\r\e[KMeasurement ${testrun} of ${TIMES_TO_RUN} fs:${fs} scheduler:${sched}"
-      sudo fio ${HOME}/${FIO_JOB} | grep "bw=" >> ${PLOT_OUTPUT_DIR}/fio-average-${START_DATETIME}-${fs}-${sched}.log
+      sudo fio ${HOME}/${FIO_JOB} | grep "bw=" >> ${PLOT_OUTPUT_DIR}/${fs}-${sched}.log
     done
   done
 done
@@ -43,8 +41,10 @@ cd ${PLOT_OUTPUT_DIR}
 for logfile in $(ls -1); do
   readlog=$(basename ${logfile} .log)-read.log
   writelog=$(basename ${logfile} .log)-write.log
-  grep read ${logfile} | sed -e 's/.*\(bw=\)\(.*\)KB.*/\2/' > ${readlog}
-  grep write ${logfile} | sed -e 's/.*\(bw=\)\(.*\)KB.*/\2/' > ${writelog}
+  echo "no $(basename ${logfile} .log)" > ${readlog}
+  echo "no $(basename ${logfile} .log)" > ${writelog}
+  grep read ${logfile} | sed -e 's/.*\(bw=\)\(.*\)KB.*/\2/' >> ${readlog}
+  grep write ${logfile} | sed -e 's/.*\(bw=\)\(.*\)KB.*/\2/' >> ${writelog}
 done
 
 
