@@ -49,8 +49,8 @@ d-i apt-setup/backports                                     boolean     true
 d-i apt-setup/services-select                               multiselect security
 d-i apt-setup/security_host                                 string      security.ubuntu.com
 d-i apt-setup/security_path                                 string      /ubuntu
-tasksel tasksel/first                                       multiselect Basic Ubuntu server
-d-i pkgsel/include                                          string      fio gnuplot xfsprogs
+d-i tasksel/first                                           select      openssh-server
+d-i pkgsel/include                                          string      openssh-server fio gnuplot xfsprogs vim git
 d-i pkgsel/upgrade                                          select      safe-upgrade
 d-i pkgsel/update-policy                                    select      none
 d-i pkgsel/updatedb                                         boolean     true

@@ -9,7 +9,7 @@ declare START_DATETIME=$(date +%F_%H%M)
 declare PLOT_OUTPUT_DIR=${HOME}/gnuplot-${START_DATETIME}
 declare -a FS_TYPE=("ext4" "xfs")
 declare -a SCHEDULERS=("noop" "deadline")
-declare TIMES_TO_RUN=1
+declare TIMES_TO_RUN=10
 
 cd ${HOME}
 cp /usr/share/doc/fio/examples/${FIO_JOB} .
@@ -22,7 +22,11 @@ for fs in "${FS_TYPE[@]}"; do
     cd /mnt/
   fi
   for sched in "${SCHEDULERS[@]}"; do
-    echo "${sched}" | sudo tee /sys/block/sda/queue/scheduler > /dev/null
+    if [[ ${fs} == "ext4" ]]; then
+      echo "${sched}" | sudo tee /sys/block/sda/queue/scheduler > /dev/null
+    else
+      echo "${sched}" | sudo tee /sys/block/sdb/queue/scheduler > /dev/null
+    fi
     #echo -n "Current scheduler was just changed to : "
     #sed -e 's/.*\[\(.*\)\].*/\1/' /sys/block/sda/queue/scheduler
     for testrun in $(seq 1 ${TIMES_TO_RUN}); do
