@@ -29,7 +29,7 @@ for fs in "${FS_TYPE[@]}"; do
     fi
     for testrun in $(seq 1 ${TIMES_TO_RUN}); do
       echo -ne "\r\e[KMeasurement ${testrun} of ${TIMES_TO_RUN} fs:${fs} scheduler:${sched}"
-      sudo fio ${HOME}/${FIO_JOB} | grep "bw=" >> ${PLOT_OUTPUT_DIR}/${fs}-${sched}.log
+      sysbench --test=fileio --file-num=1 --file-total-size=4G --file-test-mode=rndrw --file-rw-ratio=4 --max-time=240 --file-fsync-all --max-requests=0 --num-threads=64 run >> ${PLOT_OUTPUT_DIR}/${fs}-${sched}.log
     done
   done
 done
@@ -40,15 +40,10 @@ echo ""
 cd ${PLOT_OUTPUT_DIR}
 for logfile in $(ls -1); do
   readlog=$(basename ${logfile} .log)-read.log
-  writelog=$(basename ${logfile} .log)-write.log
   echo "no $(basename ${logfile} .log)" > ${readlog}
-  echo "no $(basename ${logfile} .log)" > ${writelog}
-  grep read ${logfile} | sed -e 's/.*\(bw=\)\(.*\)KB.*/\2/' >> ${readlog}
-  grep write ${logfile} | sed -e 's/.*\(bw=\)\(.*\)KB.*/\2/' >> ${writelog}
+  grep transferred ${logfile} >> ${readlog}
 done
 
-
-mv bw-${START_DATETIME}* ${PLOT_OUTPUT_DIR}
 
 unset FIO_JOB START_DATETIME PLOT_OUTPUT_DIR FS_TYPE SCHEDULERS
 exit 0
